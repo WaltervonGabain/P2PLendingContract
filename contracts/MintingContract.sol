@@ -1,0 +1,104 @@
+// SPDX-License-Identifier: MIT
+
+pragma solidity ^0.8.19;
+
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+
+contract MintingContract is ERC721, ERC721URIStorage {
+    using Counters for Counters.Counter;
+    Counters.Counter private _tokenIds;
+
+    struct Candidate {
+        address wallet;
+        uint256 voteCount;
+    }
+
+    mapping(uint256 => Candidate) private candidates;
+    mapping(address => bool) private hasVoted;
+
+    uint256 private candidateCount;
+
+    event NFTMinted(address indexed to);
+    event Vote(address indexed from, uint256 candidateId);
+
+    constructor() ERC721("MyTokenName", "MTN") {
+        candidateCount = 0;
+    }
+
+    function mint(address _to) public {
+        require(
+            !hasVoted[msg.sender],
+            "Only addresses who haven't voted can mint."
+        );
+        uint256 tokenId = _tokenIds.current();
+        _tokenIds.increment();
+        _safeMint(_to, tokenId);
+        candidates[candidateCount].wallet = msg.sender;
+        candidates[candidateCount].voteCount = 0;
+        candidateCount++;
+        emit NFTMinted(_to);
+    }
+
+    function _burn(
+        uint256 tokenId
+    ) internal override(ERC721, ERC721URIStorage) {
+        super._burn(tokenId);
+    }
+
+    function tokenURI(
+        uint256 tokenId
+    ) public view override(ERC721, ERC721URIStorage) returns (string memory) {
+        return super.tokenURI(tokenId);
+    }
+
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view override(ERC721, ERC721URIStorage) returns (bool) {
+        return super.supportsInterface(interfaceId);
+    }
+
+    function getVotes() public view returns (Candidate[] memory) {
+        Candidate[] memory voteList = new Candidate[](candidateCount);
+
+        for (uint256 i = 0; i < candidateCount; i++) {
+            voteList[i] = candidates[i];
+        }
+
+        return voteList;
+    }
+
+    function getCandidates() public view returns (address[] memory) {
+        address[] memory candidateList = new address[](candidateCount);
+
+        for (uint256 i = 0; i < candidateCount; i++) {
+            candidateList[i] = candidates[i].wallet;
+        }
+
+        return candidateList;
+    }
+
+    function vote(address _candidateAddress) public {
+        require(!hasVoted[msg.sender], "You have already voted");
+
+        uint256 candidateId = getCandidateId(_candidateAddress);
+        require(candidateId != candidateCount, "Invalid candidate");
+
+        candidates[candidateId].voteCount++;
+        hasVoted[msg.sender] = true;
+
+        emit Vote(msg.sender, candidateId);
+    }
+
+    function getCandidateId(
+        address _candidateAddress
+    ) private view returns (uint256) {
+        for (uint256 i = 0; i < candidateCount; i++) {
+            if (_candidateAddress == candidates[i].wallet) {
+                return i;
+            }
+        }
+        return candidateCount;
+    }
+}

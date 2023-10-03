@@ -5,7 +5,7 @@
   https://trufflesuite.com/docs/truffle/getting-started/writing-external-scripts
 */
 
-const Storage = artifacts.require("MintingContract");
+const Storage = artifacts.require("BorrowAndLendingContract");
 
 module.exports = async function (callback) {
   const deployed = await Storage.deployed();

@@ -5,17 +5,20 @@ A Zigurat Blockchain project for Module 9
 ## Installation
 
 ```sh
+# Do this once
 # Install Truffle
 $ npm install -g truffle
 
 # Install OpenZeppelin
 $ npm install -g @openzeppelin/contracts
+
+# Install Ganache CLI
+$ npm install -g ganache-cli
 ```
 
 Start the ganache cli
 
 ```sh
-$ npm install -g ganache-cli
 $ ganache-cli
 ```
 
@@ -38,6 +41,11 @@ $ truffle test
 ```
 
 ## FAQ
+
+- **Error: The network id specified in the truffle config (XXXXXXX) does not match the one returned by the network (YYYYYYY).  Ensure that both the network and the provider are properly configured.**
+
+  Paste YYYYYY here in the truffle-config.js (line 52) -> network_id: "XXXXXXX"
+
 
 - **How do I use this with Ganache (or any other network)?**
 

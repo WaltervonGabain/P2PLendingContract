@@ -49,7 +49,7 @@ module.exports = {
     development: {
       host: "127.0.0.1", // Ganache host (localhost)
       port: 8545, // Ganache port
-      network_id: "1695896830443", // Match any network id
+      network_id: "1696333723134", // Match any network id
       // provider: () => new HDWalletProvider(mnemonic, "HTTP://127.0.0.1:7545"),
     },
   },

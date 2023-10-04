@@ -24,9 +24,9 @@ contract P2PLendingContract is ERC721 {
         loanCount = 0;
     }
 
-    function addLoan(address lender ,uint256 amount, uint256 fee) public {  // Add an loan to loans
-        require(amount > 0, "Invalid loan");                                // Loan amount has to be more than 0
-        require(fee <= 99, "Fee too high");                                 // Loan amount has to be more than 0
+    function addLoan(address lender ,uint256 amount, uint256 fee) public {  // Add a loan to loans
+        require(amount > 0, "Loan amount has to be more than 0");
+        require(fee <= 99, "Fee too high");
 
         loans[loanCount] = Loan(loanCount, lender, amount * 100, fee * 100, lender);    // set it to owner of the loan to know its unused
         loanCount++;
@@ -42,7 +42,7 @@ contract P2PLendingContract is ERC721 {
 
         // TODO: receive amount (pay out from lender address)
 
-        loans[loanId] = Loan(loanId, loan.lender, loan.amount, loan.fee, borrower);     // Update the loan with the new borrower
+        loans[loanId] = Loan(loanId, loan.lender, loan.amount, loan.fee, borrower);     // Update the loan with the borrower
  
         emit LoanGivenTo(loanId, borrower);
     }

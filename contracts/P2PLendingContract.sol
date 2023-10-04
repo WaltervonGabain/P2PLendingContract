@@ -10,7 +10,7 @@ contract P2PLendingContract is ERC721 {
         address lender;     // Owner of the loan
         uint256 amount;     // (max) amount that can be borrowed
         uint256 fee;        // % that is received as bonus
-        address borrower;   // Borrower of the loan
+        address borrower;
     }
 
     mapping (uint256 => Loan) private loans;  // Mapping of open loans
@@ -20,40 +20,39 @@ contract P2PLendingContract is ERC721 {
     event LoanGivenTo(uint256 loanId, address borrower);
     event LoanPaidBy(uint256 loanId, address borrower, uint256 amountRemaining);
 
-
     constructor() ERC721("MyTokenName", "MTN") {
         loanCount = 0;
     }
 
     function addLoan(address lender ,uint256 amount, uint256 fee) public {  // Add an loan to loans
         require(amount > 0, "Invalid loan");                                // Loan amount has to be more than 0
-        require(fee <= 99, "Fee too high");                                // Loan amount has to be more than 0
+        require(fee <= 99, "Fee too high");                                 // Loan amount has to be more than 0
 
         loans[loanCount] = Loan(loanCount, lender, amount * 100, fee * 100, lender);    // set it to owner of the loan to know its unused
-        loanCount++;                                                        // Increase loan number
+        loanCount++;
         
         emit LoanReceivedFrom(loanCount-1, lender);
     }
 
     function takeLoan(uint256 loanId, address borrower) public {
-        require(loanId < loanCount, "Took invalid loan");                        // LoanId cannot be equal or bigger than load count
+        require(loanId < loanCount, "Took invalid loan");                   // LoanId cannot be equal or bigger than load count
 
-        Loan memory loan = getLoan(loanId);
+        Loan memory loan = loans[loanId];
         require(loan.lender != borrower, "Can't loan to self");
 
         // TODO: receive amount (pay out from lender address)
 
-        loans[loanId] = Loan(loanId, loan.lender, loan.amount, loan.fee, borrower);  // Update the loan with the new borrower
+        loans[loanId] = Loan(loanId, loan.lender, loan.amount, loan.fee, borrower);     // Update the loan with the new borrower
  
         emit LoanGivenTo(loanId, borrower);
     }
 
     function payLoan(uint256 loanId, uint256 amount) public {
-        Loan memory loan = getLoan(loanId);
+        Loan memory loan = loans[loanId];
         require(loanId < loanCount, "Paid invalid loan");
         require(loan.amount > 0, "Loan is already paid off");
         
-        uint256 decrease = amount - ((amount * loan.fee) / 10000);    // Calculate fee into amount being paid
+        uint256 decrease = amount - ((amount * loan.fee) / 10000);          // Calculate fee into amount being paid
         uint256 newLoanAmount = loan.amount - decrease;
 
         if (newLoanAmount < 100) {
@@ -75,10 +74,6 @@ contract P2PLendingContract is ERC721 {
         }
 
         return loanList;
-    }
-
-    function getLoan(uint loanId) public view returns (Loan memory) {
-        return loans[loanId];
     }
 
 }

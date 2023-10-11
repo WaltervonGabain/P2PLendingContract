@@ -3,10 +3,25 @@ const P2PLendingContract = artifacts.require("P2PLendingContract");
 contract("P2PLendingContract", (accounts) => {
   let contract;
   let fee = 5;
-  let amount = 100;
+  let amount = 1000000; // loan is 1 million wei
+  let amountWei = web3.utils.toWei(amount.toString(), "wei"); // Amount of Ether to send (in Wei)
 
   beforeEach(async () => {
     contract = await P2PLendingContract.new();
+  });
+
+  it("should receive payment and update totalPayments", async () => {
+    // GIVEN
+    await contract.receivePayment({ // Send Ether to the contract's receivePayment function
+      from: accounts[0],
+      value: amountWei,
+    });
+
+    // WHEN
+    const totalPayments = await contract.totalPayments(); // Get the updated totalPayments value from the contract
+
+    // THEN
+    assert.equal(totalPayments.toString(), amountWei, "Total payments should match sent wei amount"); // Assert that totalPayments has been updated with the sent Ether
   });
 
   it("should have loans", async () => {
@@ -32,7 +47,7 @@ contract("P2PLendingContract", (accounts) => {
   it("should have a 5% fee", async () => {
     // GIVEN
     await contract.addLoan(accounts[0], amount, fee);
-    let feePercentage = fee * 100;
+    let feePercentage = fee;
 
     // WHEN
     const loanList = await contract.getLoans();
@@ -56,6 +71,11 @@ contract("P2PLendingContract", (accounts) => {
   it("should take loan", async () => {
     // GIVEN
     await contract.addLoan(accounts[0], amount, fee);
+    await contract.receivePayment({
+      from: accounts[0],
+      value: amountWei,
+    });
+
     await contract.takeLoan(0, accounts[1]);
 
     // WHEN
@@ -95,11 +115,26 @@ contract("P2PLendingContract", (accounts) => {
   it("should pay loan", async () => {
     // GIVEN
     await contract.addLoan(accounts[0], amount, fee);
+    await contract.receivePayment({
+      from: accounts[0],
+      value: amountWei,
+    });
+
     await contract.addLoan(accounts[0], amount, fee);
+    await contract.receivePayment({
+      from: accounts[0],
+      value: amountWei,
+    });
+
     await contract.addLoan(accounts[0], amount, fee);
+    await contract.receivePayment({
+      from: accounts[0],
+      value: amountWei,
+    });
+
     await contract.takeLoan(0, accounts[1]);
-    let amountPaid = 5000; // pay 50,-
-    let expectedRemainder = 5250; // 100,- minus 47,50 due to 5% fee
+    let amountPaid = 500000; // pay half a million wei
+    let expectedRemainder = 525000;
 
     // WHEN
     await contract.payLoan(0, amountPaid);
@@ -124,7 +159,11 @@ contract("P2PLendingContract", (accounts) => {
   it("should throw loan is already paid off", async () => {
     // GIVEN
     await contract.addLoan(accounts[0], amount, fee);
-    let amountPaid = 10500; // pay 50,-
+    await contract.receivePayment({
+      from: accounts[0],
+      value: amountWei,
+    });
+    let amountPaid = 1052500;
 
     // WHEN
     await contract.payLoan(0, amountPaid);

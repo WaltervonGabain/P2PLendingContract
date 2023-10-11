@@ -49,7 +49,7 @@ module.exports = {
     development: {
       host: "127.0.0.1", // Ganache host (localhost)
       port: 8545, // Ganache port
-      network_id: "1696433809020", // <- ganache-cli network id here for truffle tests>
+      network_id: "1697015708003", // <- ganache-cli network id here for truffle tests>
       // provider: () => new HDWalletProvider(mnemonic, "HTTP://127.0.0.1:7545"),
     },
   },
